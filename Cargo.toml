@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = ["moid", "moid-cli"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70"
+repository = "https://github.com/adammharris/moid"
+homepage = "https://github.com/adammharris/moid"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+# The library. The CLI enables `os` so it can mint from ambient entropy.
+moid = { path = "moid", version = "0.1.0" }

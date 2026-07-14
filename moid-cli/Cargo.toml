@@ -1,0 +1,23 @@
+[package]
+name = "moid-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+description = "Command-line companion for the moid opaque-ID minter."
+keywords = ["noid", "identifier", "cli"]
+categories = ["command-line-utilities"]
+# Not published yet — a tool for exercising the library.
+publish = false
+
+# The crate is `moid-cli`; the installed command is `moid`.
+[[bin]]
+name = "moid"
+path = "src/main.rs"
+
+[dependencies]
+# The library, with ambient OS entropy on (a CLI always has an entropy source).
+moid = { workspace = true, features = ["os"] }
+clap = { version = "4.5", features = ["derive"] }

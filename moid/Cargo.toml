@@ -1,0 +1,26 @@
+[package]
+name = "moid"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+license.workspace = true
+readme = "README.md"
+description = "Minimal opaque ID minter: random, optionally check-digited identifiers over a configurable alphabet, with a NOID-style check character. Mint-only — binding and resolution are deliberately out of scope."
+keywords = ["noid", "ark", "identifier", "check-digit", "opaque-id"]
+categories = ["algorithms", "value-formatting"]
+
+# The core is intentionally dependency-free so it links into WASM, Extism
+# guests, and native targets alike, with entropy supplied by the caller. The
+# only optional dependency is `getrandom`, gated behind the `os`/`js` features
+# for the convenience of callers that *do* have ambient entropy.
+[dependencies]
+getrandom = { version = "0.2", optional = true }
+
+[features]
+default = []
+# Ambient OS / WASI entropy (native + server). Enables `Minter::mint_os`.
+os = ["dep:getrandom"]
+# Browser wasm32-unknown-unknown entropy (implies `os`).
+js = ["os", "getrandom/js"]
