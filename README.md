@@ -1,5 +1,9 @@
 # moid
 
+[![crates.io](https://img.shields.io/crates/v/moid.svg)](https://crates.io/crates/moid)
+[![docs.rs](https://img.shields.io/docsrs/moid)](https://docs.rs/moid)
+[![license](https://img.shields.io/crates/l/moid.svg)](#license)
+
 A cargo workspace for **moid** — *minimal opaque ID*: mint short, opaque
 identifiers over a configurable alphabet, with an optional NOID-style check
 character. Mint-only — binding and resolution are deliberately out of scope.
