@@ -1,5 +1,6 @@
 # moid
 
+[![CI](https://github.com/adammharris/moid/actions/workflows/ci.yml/badge.svg)](https://github.com/adammharris/moid/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/moid.svg)](https://crates.io/crates/moid)
 [![docs.rs](https://img.shields.io/docsrs/moid)](https://docs.rs/moid)
 [![license](https://img.shields.io/crates/l/moid.svg)](#license)
