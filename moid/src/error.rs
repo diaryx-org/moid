@@ -23,6 +23,9 @@ pub enum MoidError {
     BadCheck,
     /// A blade did not carry the minter's configured prefix.
     BadPrefix,
+    /// A prefix passed to `with_prefix` contained a character outside the
+    /// minter's alphabet, so no id built from it could ever pass `validate`.
+    PrefixOutOfAlphabet,
     /// Ambient entropy was requested (`mint_os`) but the OS source failed.
     #[cfg(feature = "os")]
     Entropy,
@@ -39,6 +42,7 @@ impl fmt::Display for MoidError {
             MoidError::BadChar => "id contains a character outside the alphabet",
             MoidError::BadCheck => "id check character does not match",
             MoidError::BadPrefix => "id is missing the expected prefix",
+            MoidError::PrefixOutOfAlphabet => "prefix contains a character outside the alphabet",
             #[cfg(feature = "os")]
             MoidError::Entropy => "the OS entropy source failed",
         };

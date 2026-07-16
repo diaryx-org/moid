@@ -122,7 +122,10 @@ mod tests {
     fn rejects_bad_alphabets() {
         assert_eq!(Alphabet::new(b""), Err(MoidError::EmptyAlphabet));
         assert_eq!(Alphabet::new(b"abca"), Err(MoidError::DuplicateSymbol));
-        assert_eq!(Alphabet::new(&[b'a', 0x80]), Err(MoidError::NonAsciiAlphabet));
+        assert_eq!(
+            Alphabet::new(&[b'a', 0x80]),
+            Err(MoidError::NonAsciiAlphabet)
+        );
     }
 
     #[test]
