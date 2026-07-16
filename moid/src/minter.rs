@@ -58,11 +58,20 @@ impl Minter {
 
     /// Prepend a fixed prefix (a "shoulder", in ARK terms). The check character,
     /// if present, is computed over the prefix *and* the random body, so a
-    /// corrupted prefix is detected. Prefix characters should be in the alphabet
-    /// for the check to cover them meaningfully.
-    pub fn with_prefix(mut self, prefix: impl Into<Box<str>>) -> Self {
-        self.prefix = Some(prefix.into());
-        self
+    /// corrupted prefix is detected.
+    ///
+    /// Every prefix character must be in the alphabet: `validate` requires the
+    /// whole id (prefix included) to be alphabet-only, so a prefix with an
+    /// out-of-alphabet character would let this minter mint ids its own
+    /// `validate` always rejects. Returns [`MoidError::PrefixOutOfAlphabet`] in
+    /// that case.
+    pub fn with_prefix(mut self, prefix: impl Into<Box<str>>) -> Result<Self, MoidError> {
+        let prefix = prefix.into();
+        if !prefix.chars().all(|c| self.alphabet.contains(c)) {
+            return Err(MoidError::PrefixOutOfAlphabet);
+        }
+        self.prefix = Some(prefix);
+        Ok(self)
     }
 
     /// The alphabet this minter draws from.
@@ -212,9 +221,23 @@ mod tests {
     }
 
     #[test]
+    fn with_prefix_rejects_out_of_alphabet_chars() {
+        // betanumeric excludes vowels and '0'/'1'/'l'; "a1" hits both a
+        // non-alphabet letter and a non-alphabet digit. Without this check the
+        // minter would happily mint ids that its own `validate` then rejects
+        // with BadChar.
+        let err = Minter::new(Alphabet::betanumeric(), 6)
+            .with_prefix("a1")
+            .unwrap_err();
+        assert_eq!(err, MoidError::PrefixOutOfAlphabet);
+    }
+
+    #[test]
     fn prefix_check_covers_the_prefix() {
         // Rebuilds diaryx_ark's workspace blade: `dx` + 6 random + check(dx+body).
-        let m = Minter::new(Alphabet::betanumeric(), 6).with_prefix("dx");
+        let m = Minter::new(Alphabet::betanumeric(), 6)
+            .with_prefix("dx")
+            .unwrap();
         assert_eq!(m.len(), 9);
         let mut rng = SeededRng::new(7);
         let id = m.mint_seeded(&mut rng);
@@ -222,7 +245,10 @@ mod tests {
         assert!(m.validate(&id).is_ok());
         // Corrupting the shoulder is caught two ways. (1) A wrong prefix fails
         // BadPrefix outright:
-        assert_eq!(m.validate(&format!("b{}", &id[1..])), Err(MoidError::BadPrefix));
+        assert_eq!(
+            m.validate(&format!("b{}", &id[1..])),
+            Err(MoidError::BadPrefix)
+        );
         // (2) The check character genuinely depends on the shoulder — changing a
         // shoulder char at equal length changes the check (hand-computed, so the
         // proof can't collide by luck):

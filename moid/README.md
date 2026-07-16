@@ -60,7 +60,10 @@ bytes yourself via `mint`.
 ## Prefix / shoulder
 
 `Minter::with_prefix("dx")` prepends a fixed prefix; the check character covers
-it, so a corrupted prefix is detected. (This is how an ARK "shoulder" is built.)
+it, so a corrupted prefix is detected. (This is how an ARK "shoulder" is
+built.) It returns `Result<Minter, MoidError>`, erroring if the prefix has a
+character outside the minter's alphabet — such a prefix would let the minter
+mint ids that its own `validate` always rejects.
 
 ## License
 

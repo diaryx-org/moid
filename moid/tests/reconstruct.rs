@@ -10,7 +10,9 @@ fn colophon_file_id_minter() -> Minter {
 
 /// diaryx's ARK workspace blade: `dx` shoulder + 6 betanumeric + check-over-all.
 fn ark_workspace_minter() -> Minter {
-    Minter::new(Alphabet::betanumeric(), 6).with_prefix("dx")
+    Minter::new(Alphabet::betanumeric(), 6)
+        .with_prefix("dx")
+        .expect("\"dx\" is in the betanumeric alphabet")
 }
 
 #[test]

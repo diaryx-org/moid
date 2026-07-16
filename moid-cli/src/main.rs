@@ -97,7 +97,7 @@ impl Shape {
             m = m.without_check();
         }
         if let Some(p) = &self.prefix {
-            m = m.with_prefix(p.clone());
+            m = m.with_prefix(p.clone())?;
         }
         Ok(m)
     }
