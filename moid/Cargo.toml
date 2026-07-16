@@ -21,6 +21,15 @@ getrandom = { version = "0.2", optional = true }
 [features]
 default = []
 # Ambient OS / WASI entropy (native + server). Enables `Minter::mint_os`.
-os = ["dep:getrandom"]
+#
+# Deliberately `["getrandom"]`, not `["dep:getrandom"]`: the latter (hiding the
+# implicit feature) trips a Cargo resolver bug on our MSRV (1.70) whenever an
+# optional dep is *also* referenced via `dep/feature` syntax elsewhere (here,
+# `getrandom/js` below) — cargo errors with "does not have feature `getrandom`"
+# even on a plain `cargo check`, before any feature is even activated. Fixed
+# upstream by Cargo 1.75; since we still claim 1.70, we eat the minor cost of
+# `getrandom` also being directly enable-able as its own (redundant, harmless)
+# public feature name.
+os = ["getrandom"]
 # Browser wasm32-unknown-unknown entropy (implies `os`).
 js = ["os", "getrandom/js"]
