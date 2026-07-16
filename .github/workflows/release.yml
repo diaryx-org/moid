@@ -1,0 +1,57 @@
+name: Release crates.io
+# Publish the `moid` library to crates.io. Only `moid` — `moid-cli` is
+# `publish = false` (an unpublished dev tool; see ci.yml's msrv job for why).
+#
+# Runs on `v*.*.*` tags, same trigger as homebrew.yml (tagging a release
+# publishes the crate and builds the CLI binaries in parallel). Re-runnable
+# via workflow_dispatch against an existing tag, e.g. to retry after a
+# transient crates.io outage — cargo publish is a no-op-then-error if that
+# exact version is already live, so this is safe to re-trigger.
+#
+# Prerequisite: a CARGO_REGISTRY_TOKEN secret on this repo (a crates.io API
+# token scoped to publish-update for `moid`).
+on:
+  push: { tags: [v*.*.*] }
+  workflow_dispatch: null
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  verify:
+    name: Verify before publish
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    steps:
+    - uses: actions/checkout@v7
+    - uses: dtolnay/rust-toolchain@stable
+      with: { components: "rustfmt,clippy" }
+    - uses: Swatinem/rust-cache@v2
+    - run: cargo fmt --all --check
+    - run: cargo clippy -p moid --all-features -- -D warnings
+    - run: cargo test -p moid --all-features
+    - run: cargo test -p moid --no-default-features
+
+  publish:
+    name: Publish moid to crates.io
+    needs: verify
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    steps:
+    - uses: actions/checkout@v7
+    - uses: dtolnay/rust-toolchain@stable
+    - name: Check tag matches the crate version
+      run: |
+        tag_version="${GITHUB_REF_NAME#v}"
+        crate_version=$(cargo metadata --no-deps --format-version=1 \
+          | jq -r '.packages[] | select(.name == "moid") | .version')
+        if [ "$tag_version" != "$crate_version" ]; then
+          echo "::error::tag $GITHUB_REF_NAME (version $tag_version) doesn't match moid's Cargo.toml version ($crate_version)"
+          exit 1
+        fi
+    - name: cargo publish --dry-run
+      run: cargo publish -p moid --dry-run
+    - name: cargo publish
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      run: cargo publish -p moid
