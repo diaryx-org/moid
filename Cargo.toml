@@ -6,8 +6,8 @@ members = ["moid", "moid-cli"]
 version = "0.1.1"
 edition = "2021"
 rust-version = "1.70"
-repository = "https://github.com/adammharris/moid"
-homepage = "https://github.com/adammharris/moid"
+repository = "https://github.com/diaryx-org/moid"
+homepage = "https://github.com/diaryx-org/moid"
 license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]

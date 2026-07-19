@@ -37,7 +37,7 @@
 
             meta = {
               description = "Command-line companion for the moid opaque-ID minter";
-              homepage = "https://github.com/adammharris/moid";
+              homepage = "https://github.com/diaryx-org/moid";
               license = with pkgs.lib.licenses; [ mit asl20 ];
               mainProgram = "moid";
               platforms = pkgs.lib.platforms.unix;

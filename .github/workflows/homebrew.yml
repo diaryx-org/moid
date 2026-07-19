@@ -17,7 +17,7 @@ name: Homebrew
 #
 # Runs on `v*.*.*` tags. Prerequisite before the first tagged release: add a
 # HOMEBREW_TAP_TOKEN secret to this repo — a PAT with contents:write on
-# adammharris/homebrew-tap.
+# diaryx-org/homebrew-tap.
 on:
   push: { tags: [v*.*.*] }
   workflow_dispatch: null
@@ -83,7 +83,7 @@ jobs:
     - name: Compute checksums and render the Homebrew formula
       run: |
         version="${GITHUB_REF_NAME#v}"
-        base="https://github.com/adammharris/moid/releases/download/${GITHUB_REF_NAME}"
+        base="https://github.com/diaryx-org/moid/releases/download/${GITHUB_REF_NAME}"
         mac_arm64_sha=$(curl -sL "$base/moid-macos-arm64.tar.gz" | sha256sum | cut -d' ' -f1)
         mac_x64_sha=$(curl -sL "$base/moid-macos-x86_64.tar.gz" | sha256sum | cut -d' ' -f1)
         linux_x64_sha=$(curl -sL "$base/moid-linux-x86_64.tar.gz" | sha256sum | cut -d' ' -f1)
@@ -91,28 +91,28 @@ jobs:
         cat > /tmp/moid.rb <<RUBY
         class Moid < Formula
           desc "Command-line companion for the moid opaque-ID minter"
-          homepage "https://github.com/adammharris/moid"
+          homepage "https://github.com/diaryx-org/moid"
           version "$version"
           license "MIT OR Apache-2.0"
 
           on_macos do
             on_arm do
-              url "https://github.com/adammharris/moid/releases/download/v$version/moid-macos-arm64.tar.gz"
+              url "https://github.com/diaryx-org/moid/releases/download/v$version/moid-macos-arm64.tar.gz"
               sha256 "$mac_arm64_sha"
             end
             on_intel do
-              url "https://github.com/adammharris/moid/releases/download/v$version/moid-macos-x86_64.tar.gz"
+              url "https://github.com/diaryx-org/moid/releases/download/v$version/moid-macos-x86_64.tar.gz"
               sha256 "$mac_x64_sha"
             end
           end
 
           on_linux do
             on_arm do
-              url "https://github.com/adammharris/moid/releases/download/v$version/moid-linux-aarch64.tar.gz"
+              url "https://github.com/diaryx-org/moid/releases/download/v$version/moid-linux-aarch64.tar.gz"
               sha256 "$linux_arm64_sha"
             end
             on_intel do
-              url "https://github.com/adammharris/moid/releases/download/v$version/moid-linux-x86_64.tar.gz"
+              url "https://github.com/diaryx-org/moid/releases/download/v$version/moid-linux-x86_64.tar.gz"
               sha256 "$linux_x64_sha"
             end
           end
@@ -129,7 +129,7 @@ jobs:
     - name: Push to the tap
       env: { COMMITTER_TOKEN: '${{ secrets.HOMEBREW_TAP_TOKEN }}' }
       run: |
-        git clone "https://x-access-token:${COMMITTER_TOKEN}@github.com/adammharris/homebrew-tap" tap
+        git clone "https://x-access-token:${COMMITTER_TOKEN}@github.com/diaryx-org/homebrew-tap" tap
         cp /tmp/moid.rb tap/Formula/moid.rb
         cd tap
         git config user.name "github-actions[bot]"
