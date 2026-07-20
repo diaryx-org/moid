@@ -51,15 +51,9 @@ jobs:
   msrv:
     name: MSRV (1.70)
     runs-on: ubuntu-latest
-    # Only the `moid` library is held to rust-version = "1.70" — it's the
-    # crate actually published to crates.io (see its README: dependency-free
-    # core meant to link into WASM/Extism guests on old toolchains). moid-cli
-    # is unpublished tooling whose `clap` dependency already needs Cargo 1.85+
-    # to even parse its lockfile-resolved `clap_lex`'s manifest (edition
-    # 2024) — a number that will keep drifting upward on its own as clap ages,
-    # independent of anything in this repo. Chasing that here would make the
-    # "MSRV" number meaningless busywork instead of a real compatibility
-    # promise, so moid-cli is intentionally left out of this job.
+    # Only the `moid` library is held to rust-version = "1.70"
+    # (meant to link into old/constrained toolchains).
+    # moid-cli needs 1.85+ (2024 edition) because of `clap`
     steps:
     - uses: actions/checkout@v7
     - uses: dtolnay/rust-toolchain@master

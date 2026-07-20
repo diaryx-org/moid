@@ -1,15 +1,9 @@
 name: Release crates.io
-# Publish the `moid` library to crates.io. Only `moid` — `moid-cli` is
-# `publish = false` (an unpublished dev tool; see ci.yml's msrv job for why).
-#
-# Runs on `v*.*.*` tags, same trigger as homebrew.yml (tagging a release
-# publishes the crate and builds the CLI binaries in parallel). Re-runnable
-# via workflow_dispatch against an existing tag, e.g. to retry after a
-# transient crates.io outage — cargo publish is a no-op-then-error if that
-# exact version is already live, so this is safe to re-trigger.
-#
-# Prerequisite: a CARGO_REGISTRY_TOKEN secret on this repo (a crates.io API
-# token scoped to publish-update for `moid`).
+# Publishes `moid` and `moid-cli` to crates.io via Trusted Publishing (OIDC)
+# Runs on `v*.*.*` tags, same trigger as homebrew.yml.
+# Idempotent: each crate is published only if that exact version is not already
+# live on crates.io, so re-running (via workflow_dispatch against the tag, or a
+# re-run after a partial failure) is safe and stays green.
 on:
   push: { tags: [v*.*.*] }
   workflow_dispatch: null
@@ -31,16 +25,20 @@ jobs:
     - run: cargo clippy -p moid --all-features -- -D warnings
     - run: cargo test -p moid --all-features
     - run: cargo test -p moid --no-default-features
+    - run: cargo publish -p moid --dry-run
 
   publish:
-    name: Publish moid to crates.io
+    name: Publish to crates.io
     needs: verify
     runs-on: ubuntu-latest
     if: github.ref_type == 'tag'
+    permissions:
+      id-token: write   # mint the OIDC token
+      contents: read    # checkout
     steps:
     - uses: actions/checkout@v7
     - uses: dtolnay/rust-toolchain@stable
-    - name: Check tag matches the crate version
+    - name: Check tag matches the library version
       run: |
         tag_version="${GITHUB_REF_NAME#v}"
         crate_version=$(cargo metadata --no-deps --format-version=1 \
@@ -49,9 +47,51 @@ jobs:
           echo "::error::tag $GITHUB_REF_NAME (version $tag_version) doesn't match moid's Cargo.toml version ($crate_version)"
           exit 1
         fi
-    - name: cargo publish --dry-run
-      run: cargo publish -p moid --dry-run
-    - name: cargo publish
+    - name: Authenticate to crates.io (Trusted Publishing)
+      uses: rust-lang/crates-io-auth-action@v1
+      id: auth
+    - name: Publish (idempotent — skips versions already live)
       env:
-        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-      run: cargo publish -p moid
+        CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+      run: |
+        set -euo pipefail
+
+        version_of() {
+          cargo metadata --no-deps --format-version=1 \
+            | jq -r ".packages[] | select(.name == \"$1\") | .version"
+        }
+
+        # Succeeds (exit 0) iff crate $1 version $2 is already on crates.io.
+        # crates.io returns 403 without a User-Agent, so one is required — else
+        # every check would fail-closed and the guard would republish blindly.
+        is_published() {
+          curl -sf -A "moid-release-ci (github actions)" \
+            "https://crates.io/api/v1/crates/$1/$2" >/dev/null 2>&1
+        }
+
+        publish() {
+          local crate="$1" version
+          version=$(version_of "$crate")
+          if is_published "$crate" "$version"; then
+            echo "::notice::$crate $version already on crates.io — skipping"
+            return 0
+          fi
+          echo "Publishing $crate $version"
+          cargo publish -p "$crate"
+        }
+
+        # Library first; the CLI depends on it.
+        publish moid
+
+        # `cargo publish` already waits for the crate to reach the registry
+        # index before returning, but if `moid` was skipped above (already live
+        # from an earlier run) we never called it — poll to be sure the version
+        # is resolvable before the CLI, which depends on it, is built.
+        moid_version=$(version_of moid)
+        for i in $(seq 1 30); do
+          if is_published moid "$moid_version"; then break; fi
+          echo "waiting for moid $moid_version on crates.io ($i/30)…"
+          sleep 10
+        done
+
+        publish moid-cli
