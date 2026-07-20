@@ -64,6 +64,23 @@ impl Alphabet {
         self.symbols.len()
     }
 
+    /// The symbols, in order, as a string slice.
+    ///
+    /// The inverse of [`Alphabet::new`]: `Alphabet::new(a.as_str().as_bytes())`
+    /// reproduces `a`. Handy for logging, debugging, or persisting a minter's
+    /// configuration without reaching for a serializer.
+    #[inline]
+    pub fn as_str(&self) -> &str {
+        // Every symbol was validated ASCII in `new`, so this never fails.
+        core::str::from_utf8(&self.symbols).expect("alphabet symbols are ASCII")
+    }
+
+    /// The symbols, in order, as bytes.
+    #[inline]
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.symbols
+    }
+
     /// The 0-based ordinal of `c`, or `None` if it is not in the alphabet.
     #[inline]
     pub fn ordinal(&self, c: char) -> Option<usize> {
@@ -156,5 +173,14 @@ mod tests {
         assert_eq!(Alphabet::betanumeric().radix(), 28);
         assert_eq!(Alphabet::noid_xdigit().radix(), 29);
         assert_eq!(Alphabet::crockford32().radix(), 32);
+    }
+
+    #[test]
+    fn as_str_round_trips_through_new() {
+        let a = Alphabet::betanumeric();
+        assert_eq!(a.as_str(), "bcdfghjkmnpqrstvwxyz23456789");
+        assert_eq!(a.as_bytes(), presets::BETANUMERIC);
+        // The inverse of `new`: symbols read back reconstruct the same alphabet.
+        assert_eq!(Alphabet::new(a.as_str().as_bytes()).unwrap(), a);
     }
 }

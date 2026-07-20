@@ -35,7 +35,7 @@
 //! - **Binding and resolution** — see [Scope](#scope-mint-only) above;
 //!   both need persistent state and belong in your own registry or resolver.
 //! - **Serialization / `serde`** — an [`Alphabet`] is a handful of ASCII bytes
-//!   and a [`Minter`] is a few plain fields;
+//!   ([`Alphabet::as_str`]) and a [`Minter`] is a few plain fields;
 //!   reconstruct them from your own config rather than pulling in a derive.
 //! - **Sortable or time-encoded ids** (ULID-, KSUID-, Snowflake-style) —
 //!   moid mints *opaque* handles that carry no embedded timestamp or ordering;
