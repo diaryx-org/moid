@@ -1,6 +1,6 @@
 [package]
 name = "moid-cli"
-version.workspace = true
+version = "1.0.0"
 edition.workspace = true
 rust-version.workspace = true
 repository.workspace = true
@@ -9,8 +9,8 @@ license.workspace = true
 description = "Command-line companion for the moid opaque-ID minter."
 keywords = ["noid", "identifier", "cli"]
 categories = ["command-line-utilities"]
-# Not published yet — a tool for exercising the library.
-publish = false
+readme = "README.md"
+publish = true
 
 # The crate is `moid-cli`; the installed command is `moid`.
 [[bin]]

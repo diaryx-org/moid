@@ -51,11 +51,20 @@ runs anywhere. Conveniences:
 
 ### Features
 
+- `std` *(default)* — implements `std::error::Error` for `MoidError`. That's
+  the *only* thing it gates: the rest of the crate is `#![no_std]`, needing just
+  `alloc` for the `String` it mints. Build with `default-features = false` to
+  link into a `no_std` target.
 - `os` — enables `mint_os` via `getrandom` (native + WASI).
 - `js` — browser `wasm32-unknown-unknown` entropy (implies `os`).
 
-Leave both off (the default) on Extism guests and exotic wasm hosts, and supply
-bytes yourself via `mint`.
+Leave `os`/`js` off (the default) on Extism guests and exotic wasm hosts, and
+supply bytes yourself via `mint`.
+
+```toml
+# no_std: dependency-free core, bring-your-own entropy.
+moid = { version = "1", default-features = false }
+```
 
 ## Prefix / shoulder
 

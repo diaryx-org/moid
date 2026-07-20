@@ -178,14 +178,14 @@ checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
 name = "moid"
-version = "0.1.1"
+version = "1.0.0"
 dependencies = [
  "getrandom",
 ]
 
 [[package]]
 name = "moid-cli"
-version = "0.1.1"
+version = "1.0.0"
 dependencies = [
  "clap",
  "moid",

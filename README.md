@@ -14,8 +14,8 @@ character. Mint-only — binding and resolution are deliberately out of scope.
 - **`moid/`** — the library (published to crates.io). Dependency-free core;
   `getrandom` is optional behind the `os`/`js` features. See
   [`moid/README.md`](moid/README.md) for the full API and rationale.
-- **`moid-cli/`** — a small command-line companion for exercising the library
-  (the installed binary is `moid`). Not published.
+- **`moid-cli/`** — a small command-line companion (the installed binary is
+  `moid`). Published to crates.io: `cargo install moid-cli`.
 
 ## CLI
 
