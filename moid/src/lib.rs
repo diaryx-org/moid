@@ -27,6 +27,34 @@
 //! link into WASM and Extism guests. So they are out of scope by design, not by
 //! omission.
 //!
+//! ## Non-goals
+//!
+//! These are declined on purpose,
+//! so that "minimal" is a promise rather than an omission:
+//!
+//! - **Binding and resolution** — see [Scope](#scope-mint-only) above;
+//!   both need persistent state and belong in your own registry or resolver.
+//! - **Serialization / `serde`** — an [`Alphabet`] is a handful of ASCII bytes
+//!   and a [`Minter`] is a few plain fields;
+//!   reconstruct them from your own config rather than pulling in a derive.
+//! - **Sortable or time-encoded ids** (ULID-, KSUID-, Snowflake-style) —
+//!   moid mints *opaque* handles that carry no embedded timestamp or ordering;
+//!   reach for a dedicated crate when you need lexicographic sort keys.
+//! - **Cryptographic randomness guarantees** — the built-in [`SeededRng`] is a
+//!   deterministic, non-cryptographic PRNG;
+//!   uniqueness comes from rejection against a taken-set,
+//!   not from entropy strength.
+//!   Supply your own CSPRNG bytes (or use [`Minter::mint_os`])
+//!   when unpredictability matters.
+//!
+//! ## `no_std`
+//!
+//! The core is `#![no_std]`,
+//! depending only on `alloc` for the [`String`](alloc::string::String) it mints.
+//! The default `std` feature adds nothing but
+//! `impl std::error::Error for `[`MoidError`];
+//! disable it (`default-features = false`) to link into a `no_std` target.
+//!
 //! ## Entropy
 //!
 //! Every mint takes caller-supplied bytes, so the core has **no dependencies**
@@ -41,6 +69,13 @@
 //! NOID minter only when you mint over [`Alphabet::noid_xdigit`]. The
 //! betanumeric set ([`Alphabet::betanumeric`]) is one preset among
 //! [several](presets).
+
+#![no_std]
+
+extern crate alloc;
+
+#[cfg(feature = "std")]
+extern crate std;
 
 mod alphabet;
 mod error;

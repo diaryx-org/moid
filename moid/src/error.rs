@@ -1,11 +1,14 @@
 //! Error type for alphabet construction and blade validation.
 
-use std::error::Error;
-use std::fmt;
+use core::fmt;
 
 /// Errors produced while constructing an [`crate::Alphabet`] or validating a
 /// minted id.
+///
+/// Marked `#[non_exhaustive]`: match with a wildcard arm, as new variants may be
+/// added in future without a major version bump.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum MoidError {
     /// An alphabet must have at least one symbol.
     EmptyAlphabet,
@@ -50,4 +53,5 @@ impl fmt::Display for MoidError {
     }
 }
 
-impl Error for MoidError {}
+#[cfg(feature = "std")]
+impl std::error::Error for MoidError {}

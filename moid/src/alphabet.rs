@@ -1,6 +1,8 @@
 //! The symbol set an id is drawn from, and the NOID-style check character
 //! defined over it.
 
+use alloc::boxed::Box;
+
 use crate::error::MoidError;
 use crate::presets;
 

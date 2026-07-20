@@ -1,5 +1,8 @@
 //! The minter: alphabet + length + optional check char + optional prefix.
 
+use alloc::boxed::Box;
+use alloc::string::String;
+
 use crate::alphabet::Alphabet;
 use crate::error::MoidError;
 use crate::rng::SeededRng;
@@ -190,6 +193,9 @@ impl Minter {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::format;
+    use alloc::vec;
+    use alloc::vec::Vec;
 
     fn seq(bytes: Vec<u8>) -> impl FnMut() -> u8 {
         let mut i = 0;

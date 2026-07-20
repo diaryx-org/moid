@@ -1,5 +1,5 @@
 //! Ready-made alphabets. Pass one to [`Alphabet::new`](crate::Alphabet::new),
-//! or use the matching constructor (e.g. [`Alphabet::betanumeric`]).
+//! or use the matching constructor (e.g. [`Alphabet::betanumeric`](crate::Alphabet::betanumeric)).
 
 /// 28 chars: no vowels (no accidental words), no `0`/`1`/`l` (no ambiguity),
 /// includes `y`. The alphabet colophon and diaryx mint from.

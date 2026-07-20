@@ -11,6 +11,11 @@ description = "Minimal opaque ID minter: random, optionally check-digited identi
 keywords = ["noid", "ark", "identifier", "check-digit", "opaque-id"]
 categories = ["algorithms", "value-formatting"]
 
+# Build docs with every feature so `os`-gated items (e.g. `Minter::mint_os`) and
+# the intra-doc links to them resolve on docs.rs.
+[package.metadata.docs.rs]
+all-features = true
+
 # The core is intentionally dependency-free so it links into WASM, Extism
 # guests, and native targets alike, with entropy supplied by the caller. The
 # only optional dependency is `getrandom`, gated behind the `os`/`js` features
@@ -19,7 +24,15 @@ categories = ["algorithms", "value-formatting"]
 getrandom = { version = "0.2", optional = true }
 
 [features]
-default = []
+default = ["std"]
+# Standard library support. Enables `impl std::error::Error for MoidError`.
+#
+# The core is otherwise `#![no_std]` (it needs only `alloc` for `String`), so
+# turn this off — `default-features = false` — to link into a `no_std` target.
+# The `Error` impl is the only thing behind it; MSRV 1.70 predates
+# `core::error::Error` (stabilised in 1.81), so the trait can only come from
+# `std` for now.
+std = []
 # Ambient OS / WASI entropy (native + server). Enables `Minter::mint_os`.
 #
 # Deliberately `["getrandom"]`, not `["dep:getrandom"]`: the latter (hiding the
