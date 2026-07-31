@@ -414,7 +414,8 @@ describe("properties that must hold for any implementation", () => {
   });
 
   test("mintUnique never returns a taken id", () => {
-    const minter = new Minter({ randomLength: 2 });
+    // A tiny body so collisions actually happen and the retry loop is exercised.
+    const minter = new Minter({ alphabet: Alphabet.betanumeric(), randomLength: 2 });
     const taken = new Set<string>();
     const rng = new SeededRng(5n);
     for (let i = 0; i < 200; i++) {
@@ -429,8 +430,11 @@ describe("properties that must hold for any implementation", () => {
     // Two independent defences, and the test separates them: `validate`
     // rejects a wrong prefix outright, *and* the check character genuinely
     // depends on the prefix, so the shoulder is not merely decorative.
+    // Betanumeric explicitly, not the default: the hand-computed check
+    // characters at the bottom are specific to it, and `y` is not in every
+    // alphabet.
     const alphabet = Alphabet.betanumeric();
-    const minter = new Minter({ randomLength: 6, prefix: "dx" });
+    const minter = new Minter({ alphabet, randomLength: 6, prefix: "dx" });
     const id = minter.mintSeeded(new SeededRng(7n));
     assert.ok(id.startsWith("dx"));
     assert.ok(minter.isValid(id));

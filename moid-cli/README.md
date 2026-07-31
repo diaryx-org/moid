@@ -15,28 +15,33 @@ $ cargo install moid-cli
 
 ```console
 $ moid mint --seed 42
-b29r4b9
+0hscptb
 $ moid mint --seed 42 -n 3
-b29r4b9
-yk7fbqx
-9h8znpw
+0hscptb
+f2p0z49
+v2pk788
 $ moid mint --prefix dx --seed 7          # an ARK-style shoulder
-dxbb7mht2
+dx0vn4188
 $ moid mint --alphabet crockford32 --seed 1
 0GVN6P7
-$ moid validate b29r4b9
+$ moid validate 0hscptb
 valid
-$ moid validate b29r4bb                    # exits non-zero on a bad id
+$ moid validate 0hscptc                    # exits non-zero on a bad id
 error: invalid: id check character does not match
 $ moid check --alphabet betanumeric bcdfgh
 t
 $ moid alphabets
+noid-xdigit  radix 29  0123456789bcdfghjkmnpqrstvwxz  (default)
 betanumeric  radix 28  bcdfghjkmnpqrstvwxyz23456789
-noid-xdigit  radix 29  0123456789bcdfghjkmnpqrstvwxz
 crockford32  radix 32  0123456789ABCDEFGHJKMNPQRSTVWXYZ
 ```
 
 Without `--seed`, `mint` draws from OS entropy.
+
+`--alphabet` defaults to `noid-xdigit` because 29 is prime, which is what lets
+the check character catch every single-character typo in an id shorter than 29
+symbols. Over a composite radix some substitutions leave the check character
+untouched. See the [library README](https://github.com/diaryx-org/moid/tree/master/moid#which-one).
 
 ## Commands
 
@@ -51,7 +56,7 @@ Without `--seed`, `mint` draws from OS entropy.
 
 | Flag | Default | Meaning |
 | --- | --- | --- |
-| `--alphabet <NAME>` | `betanumeric` | Built-in alphabet: `betanumeric`, `noid-xdigit`, or `crockford32`. |
+| `--alphabet <NAME>` | `noid-xdigit` | Built-in alphabet: `noid-xdigit`, `betanumeric`, or `crockford32`. |
 | `--chars <SYMBOLS>` | — | Custom alphabet symbols (overrides `--alphabet`). |
 | `--len <N>` | `6` | Number of random symbols (before the check character). |
 | `--no-check` | off | Omit the trailing check character. |

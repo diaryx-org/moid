@@ -40,14 +40,14 @@ primitives. Details in [`moid-ts/README.md`](moid-ts/README.md#parity).
 
 ```console
 $ cargo run -p moid-cli -- mint --seed 42
-b29r4b9
-$ cargo run -p moid-cli -- mint --prefix dx        # an ARK-style shoulder
-dxbb7mht2
-$ cargo run -p moid-cli -- validate b29r4b9
+0hscptb
+$ cargo run -p moid-cli -- mint --prefix dx --seed 7   # an ARK-style shoulder
+dx0vn4188
+$ cargo run -p moid-cli -- validate 0hscptb
 valid
 $ cargo run -p moid-cli -- alphabets
+noid-xdigit  radix 29  0123456789bcdfghjkmnpqrstvwxz  (default)
 betanumeric  radix 28  bcdfghjkmnpqrstvwxyz23456789
-noid-xdigit  radix 29  0123456789bcdfghjkmnpqrstvwxz
 crockford32  radix 32  0123456789ABCDEFGHJKMNPQRSTVWXYZ
 ```
 

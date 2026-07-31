@@ -47,7 +47,12 @@ enum Command {
 #[derive(Args)]
 struct AlphabetArg {
     /// Built-in alphabet.
-    #[arg(long, value_enum, default_value_t = Preset::Betanumeric)]
+    ///
+    /// Defaults to `noid-xdigit`: its radix (29) is prime, so the check
+    /// character catches every single-character typo in an id shorter than 29
+    /// symbols. Over a composite radix some substitutions leave the check
+    /// character untouched — see `Alphabet::check_char`.
+    #[arg(long, value_enum, default_value_t = Preset::NoidXdigit)]
     alphabet: Preset,
     /// Custom alphabet symbols (overrides --alphabet).
     #[arg(long, value_name = "SYMBOLS")]
@@ -139,13 +144,14 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
             println!("{}", alphabet.build()?.check_char(&body));
         }
         Command::Alphabets => {
-            for (name, chars) in [
-                ("betanumeric", &presets::BETANUMERIC[..]),
-                ("noid-xdigit", &presets::NOID_XDIGIT[..]),
-                ("crockford32", &presets::CROCKFORD32[..]),
+            for (name, chars, default) in [
+                ("noid-xdigit", &presets::NOID_XDIGIT[..], true),
+                ("betanumeric", &presets::BETANUMERIC[..], false),
+                ("crockford32", &presets::CROCKFORD32[..], false),
             ] {
                 let symbols = std::str::from_utf8(chars).unwrap_or("<non-utf8>");
-                println!("{name:<12} radix {:>2}  {symbols}", chars.len());
+                let mark = if default { "  (default)" } else { "" };
+                println!("{name:<12} radix {:>2}  {symbols}{mark}", chars.len());
             }
         }
     }

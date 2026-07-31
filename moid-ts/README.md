@@ -7,9 +7,9 @@ package.
 ```ts
 import { Minter } from "moid";
 
-// 6 random betanumeric symbols + 1 check character = a 7-char id.
+// 6 random NOID extended-digit symbols + 1 check character = a 7-char id.
 const minter = new Minter();
-const id = minter.mint();     // "b29r4b9"
+const id = minter.mint();     // "9nb12rp"
 minter.isValid(id);           // true
 ```
 
@@ -46,8 +46,8 @@ any alphabet works. Presets:
 
 | Preset | Radix | Notes |
 | --- | --- | --- |
+| `Alphabet.noidXdigit()` | 29 | **the default** — canonical NOID set; check chars match a standard NOID minter |
 | `Alphabet.betanumeric()` | 28 | no vowels, no `0`/`1`/`l`, includes `y` |
-| `Alphabet.noidXdigit()` | 29 | canonical NOID set — check chars match a standard NOID minter |
 | `Alphabet.crockford32()` | 32 | Crockford base32 |
 
 Or `new Alphabet("...")` with your own.
@@ -63,17 +63,29 @@ const minter = new Minter({
 });
 ```
 
-### What the check character actually guarantees
+### Why `noidXdigit` is the default
 
-A substitution at 1-based position `i` shifts the weighted sum by `delta × i`,
-so it is caught exactly when the radix does not divide `delta × i`. Over a
-**prime** radix larger than the id, that is every single-character typo. Over a
-composite radix, a few slip through — with betanumeric (radix 28), changing
-position 4 by exactly 7 ordinals leaves the check character untouched.
+A substitution at 1-based position `i` that shifts a symbol's ordinal by `delta`
+moves the weighted sum by `delta × i`, so the check character catches it exactly
+when the radix does not divide `delta × i`.
 
-That is inherent to the algorithm, not a defect in this port, and it is why the
-canonical NOID alphabet has 29 symbols. Reach for `Alphabet.noidXdigit()` when
-catching every single-character typo matters.
+With **29 prime** and `delta` necessarily smaller than it, that fails only when
+`29 | i` — so every single-character typo in an id shorter than 29 symbols is
+caught. Over a composite radix some are not: with `betanumeric` (28) a shift of
+7 at position 4 is invisible, and `crockford32` (32) has the same problem at
+position 2.
+
+Dropping `y` is the other reason. It is the letter that lets an otherwise
+consonant-only string read as a word (`shy`, `dry`, `sky`), and it is the one
+confusable pair (`v`/`y`) where betanumeric has *both* members in the alphabet.
+`noidXdigit` reintroduces `0` and `1`, but `O`, `o`, `l`, and `I` are in neither
+alphabet — so a misread lands outside the symbol set and fails as `BadChar`
+rather than passing silently.
+
+At the default 6-symbol length all three presets catch every realistic typo; the
+blind spots open up as ids get longer. Pass `alphabet` if you need a specific
+symbol set — `betanumeric` is what
+[diaryx](https://github.com/diaryx-org) and colophon mint from.
 
 ## Entropy
 
@@ -85,7 +97,7 @@ import { Minter, SeededRng } from "moid";
 const minter = new Minter();
 
 // Deterministic — for tests and reproducibility. Not cryptographic.
-minter.mintSeeded(new SeededRng(42n));   // "b29r4b9", same as the Rust
+minter.mintSeeded(new SeededRng(42n));   // "0hscptb", same as the Rust
 
 // Bring your own bytes: any () => number in 0..=255.
 minter.mint(myByteSource);

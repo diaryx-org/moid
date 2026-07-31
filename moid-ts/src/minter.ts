@@ -8,7 +8,11 @@ import { osBytes, type ByteSource, type SeededRng } from "./rng.ts";
 
 /** How a {@link Minter} is configured. Every field has a default. */
 export interface MinterOptions {
-  /** The symbol set to draw from. Defaults to {@link Alphabet.betanumeric}. */
+  /**
+   * The symbol set to draw from. Defaults to {@link Alphabet.noidXdigit},
+   * whose radix (29) is prime — see {@link Alphabet.checkChar} for why that
+   * decides how many typos the check character can catch.
+   */
   alphabet?: Alphabet;
   /** How many random symbols to draw. Defaults to `6`. */
   randomLength?: number;
@@ -49,6 +53,8 @@ function nextSymbol(alphabet: Alphabet, next: ByteSource): string {
  * id.length;                 // 7
  * minter.isValid(id);        // true
  * ```
+ *
+ * Defaults to the NOID extended-digit alphabet; pass `alphabet` for another.
  */
 export class Minter {
   readonly #alphabet: Alphabet;
@@ -65,7 +71,7 @@ export class Minter {
    */
   constructor(options: MinterOptions = {}) {
     const {
-      alphabet = Alphabet.betanumeric(),
+      alphabet = Alphabet.noidXdigit(),
       randomLength = DEFAULT_RANDOM_LENGTH,
       check = true,
       prefix,

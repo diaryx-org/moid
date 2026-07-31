@@ -84,13 +84,18 @@ describe("Alphabet", () => {
 });
 
 describe("Minter", () => {
-  test("defaults to six betanumeric symbols plus a check character", () => {
+  test("defaults to six NOID extended-digit symbols plus a check character", () => {
     const minter = new Minter();
     assert.equal(minter.length, 7);
     assert.equal(minter.randomLength, 6);
     assert.equal(minter.check, true);
     assert.equal(minter.prefix, undefined);
-    assert.ok(minter.alphabet.equals(Alphabet.betanumeric()));
+    assert.ok(minter.alphabet.equals(Alphabet.noidXdigit()));
+    // The reason for the default, asserted rather than left to the comment: a
+    // prime radix is what makes the check character catch every single-symbol
+    // typo in an id this short.
+    assert.equal(minter.alphabet.radix, 29);
+    assert.ok(minter.length < minter.alphabet.radix);
   });
 
   test("the builders return new minters and leave the original alone", () => {
@@ -208,7 +213,7 @@ describe("ambient entropy", () => {
       assert.ok(minter.isValid(id), id);
       ids.add(id);
     }
-    // 28^6 possibilities; 2000 draws colliding more than a handful of times
+    // 29^6 possibilities; 2000 draws colliding more than a handful of times
     // would mean the entropy is not what it claims.
     assert.ok(ids.size > 1990, `only ${ids.size} distinct ids in 2000 draws`);
   });

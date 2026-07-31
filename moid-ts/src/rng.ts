@@ -33,7 +33,7 @@ const ZERO_SEED_ESCAPE = 0x9e3779b97f4a7c15n;
  *
  * ```ts
  * const rng = new SeededRng(42n);
- * new Minter().mintSeeded(rng); // the same id the Rust mints from seed 42
+ * new Minter().mintSeeded(rng); // "0hscptb" — what the Rust mints from seed 42
  * ```
  *
  * The state is a `bigint` because the algorithm is 64-bit and JavaScript

@@ -8,11 +8,15 @@
  * ```ts
  * import { Minter } from "moid";
  *
- * // 6 random betanumeric symbols + 1 check character = a 7-char id.
+ * // 6 random NOID extended-digit symbols + 1 check character = a 7-char id.
  * const minter = new Minter();
  * const id = minter.mint();
  * minter.isValid(id); // true
  * ```
+ *
+ * The default alphabet is {@link Alphabet.noidXdigit}, whose radix (29) is
+ * prime — which is what lets the check character catch every single-character
+ * typo in an id this short. Pass `alphabet` for another.
  *
  * This is a hand-written port of the [`moid`](https://crates.io/crates/moid)
  * Rust crate, held to byte-for-byte agreement with it by a golden-vector suite
