@@ -48,6 +48,77 @@ jobs:
     - name: cargo test --workspace --all-features
       run: cargo test --workspace --all-features
 
+  typescript:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    # No Rust here on purpose: moid-ts ships with its golden vectors checked
+    # in, so the package has to be testable by someone who has never installed
+    # cargo.
+    defaults:
+      run: { working-directory: moid-ts }
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-node@v4
+      # 24 for native TypeScript type stripping — it is why the package needs
+      # no test-runner or transpiler dependency.
+      with: { node-version: 24, cache: npm, cache-dependency-path: moid-ts/package-lock.json }
+    - run: npm ci
+    - name: Type-check sources and tests
+      run: npm run check
+    - name: Test
+      run: npm test
+    - name: Build
+      run: npm run build
+
+  parity:
+    name: Rust <-> TypeScript parity
+    runs-on: ubuntu-latest
+    # Both toolchains, because this job checks the two implementations against
+    # each other rather than either against itself.
+    steps:
+    - uses: actions/checkout@v7
+    - uses: dtolnay/rust-toolchain@stable
+    - uses: Swatinem/rust-cache@v2
+    - uses: actions/setup-node@v4
+      with: { node-version: 24, cache: npm, cache-dependency-path: moid-ts/package-lock.json }
+    - run: npm ci
+      working-directory: moid-ts
+
+    # Rust -> TypeScript. Regenerating must be a no-op: if the crate's output
+    # moved and the checked-in vectors did not, the port is being held to a
+    # stale reference.
+    - name: Regenerate the golden vectors
+      run: cargo run -q -p moid-parity -- moid-ts/test/vectors.json
+    - name: Fail if the golden vectors drifted
+      run: |
+        git diff --exit-code -- moid-ts/test/vectors.json || {
+          echo "::error::moid-ts/test/vectors.json is stale. The Rust output changed."
+          echo "Run: cargo run -p moid-parity -- moid-ts/test/vectors.json"
+          exit 1
+        }
+    - name: Check the port against them
+      run: npm test
+      working-directory: moid-ts
+
+    # TypeScript -> Rust. Same drift rule in the other direction, then the
+    # random sweep the committed file cannot carry.
+    - name: Regenerate the TypeScript-minted ids
+      run: npm run vectors:ts
+      working-directory: moid-ts
+    - name: Fail if the TypeScript-minted ids drifted
+      run: |
+        git diff --exit-code -- moid-ts/test/ts-minted.tsv || {
+          echo "::error::moid-ts/test/ts-minted.tsv is stale. The port's output changed."
+          echo "Run: npm run vectors:ts (in moid-ts/)"
+          exit 1
+        }
+    - name: Require the random sweep to exist
+      # The Rust test skips this file when it is absent. Absent here would mean
+      # the sweep silently stopped running.
+      run: test -s moid-ts/test/ts-minted-random.tsv
+    - name: Validate them from Rust
+      run: cargo test -p moid-parity
+
   msrv:
     name: MSRV (1.70)
     runs-on: ubuntu-latest

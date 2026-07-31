@@ -16,6 +16,25 @@ character. Mint-only — binding and resolution are deliberately out of scope.
   [`moid/README.md`](moid/README.md) for the full API and rationale.
 - **`moid-cli/`** — a small command-line companion (the installed binary is
   `moid`). Published to crates.io: `cargo install moid-cli`.
+- **`moid-ts/`** — a hand-written TypeScript port (published to npm as `moid`).
+  Zero dependencies, ESM, no wasm. See [`moid-ts/README.md`](moid-ts/README.md).
+- **`parity/`** — the harness that keeps the two implementations honest. Never
+  published.
+
+## Parity
+
+The port is pinned to the crate in both directions, and CI fails on either.
+`cargo run -p moid-parity` records what the crate does into
+`moid-ts/test/vectors.json`, which is committed and which the TypeScript suite
+asserts against; `npm run vectors:ts` mints ids on the TypeScript side that
+`cargo test -p moid-parity` hands back to the crate to re-mint and validate.
+Regenerating either artifact must be a no-op — a diff means one side moved
+without the other.
+
+Agreement alone would not prove much, so `moid-ts/test/reference.test.ts` also
+checks the port against check characters computed by hand from the prose
+definition and against a second naive implementation built on different
+primitives. Details in [`moid-ts/README.md`](moid-ts/README.md#parity).
 
 ## CLI
 

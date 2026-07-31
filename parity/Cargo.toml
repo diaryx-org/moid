@@ -1,0 +1,16 @@
+[package]
+name = "moid-parity"
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+license.workspace = true
+description = "Generates the golden vectors the moid-ts port is held to. Never published."
+# A development harness, not a product. It exists so `moid-ts` can be checked
+# against the Rust implementation rather than against itself.
+publish = false
+
+# `os` only so the `MoidError::Entropy` Display string can be exported for
+# message parity — no vector is minted from ambient entropy, because every
+# vector has to be reproducible.
+[dependencies]
+moid = { workspace = true, features = ["os"] }

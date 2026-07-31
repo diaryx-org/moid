@@ -1,0 +1,37 @@
+// Build config: src -> dist (ESM + declarations).
+// See tsconfig.test.json for type-checking the tests.
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+
+    // Source imports carry `.ts` so Node's native type stripping can run the
+    // tests with no build step; `rewriteRelativeImportExtensions` turns them
+    // into `.js` on the way out.
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+
+    // Rejects enums, namespaces, and parameter properties — the TypeScript
+    // that Node cannot strip.
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}

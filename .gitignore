@@ -2,3 +2,10 @@
 
 # Nix build symlink
 /result
+
+# moid-ts
+node_modules/
+/moid-ts/dist/
+# Minted from ambient entropy, so it differs every run. Regenerate with
+# `npm run vectors:ts`; the seeded companion, ts-minted.tsv, *is* committed.
+/moid-ts/test/ts-minted-random.tsv

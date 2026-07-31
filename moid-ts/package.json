@@ -1,0 +1,53 @@
+{
+  "name": "moid",
+  "version": "1.0.0",
+  "description": "Minimal opaque ID minter: random, optionally check-digited identifiers over a configurable alphabet, with a NOID-style check character. Mint-only — binding and resolution are deliberately out of scope.",
+  "keywords": [
+    "noid",
+    "ark",
+    "identifier",
+    "check-digit",
+    "opaque-id"
+  ],
+  "homepage": "https://github.com/diaryx-org/moid/tree/master/moid-ts#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diaryx-org/moid.git",
+    "directory": "moid-ts"
+  },
+  "license": "MIT OR Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.test.json",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "vectors:rust": "cargo run -q --manifest-path ../Cargo.toml -p moid-parity -- test/vectors.json",
+    "vectors:ts": "node test/gen-ts-minted.ts",
+    "prepublishOnly": "npm run check && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.9.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
