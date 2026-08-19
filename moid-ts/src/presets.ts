@@ -5,7 +5,11 @@
 
 /**
  * 28 chars: no vowels (no accidental words), no `0`/`1`/`l` (no ambiguity),
- * includes `y`. The alphabet colophon and diaryx mint from.
+ * includes `y`.
+ *
+ * The alphabet prov and diaryx minted from before both moved to
+ * {@link NOID_XDIGIT}, so it is a compatibility set: reach for it to validate
+ * ids minted under the old vocabulary, not to mint new ones.
  */
 export const BETANUMERIC = "bcdfghjkmnpqrstvwxyz23456789";
 

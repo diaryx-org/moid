@@ -312,7 +312,8 @@ describe("properties that must hold for any implementation", () => {
     // when the radix does not divide `delta * i`.
     //
     // That is a real limit, not a bug: over a composite radix some single-
-    // character typos are invisible (radix 28, position 4, a shift of 7). Over
+    // character typos are invisible (radix 28, position 2, a shift of 14 — the
+    // adjacent-key slip `c` -> `v`, which no check character can see). Over
     // a *prime* radix larger than any position, none are — which is why the
     // canonical NOID alphabet has 29 symbols. Asserting the law both ways
     // pins the guarantee and stops the caveat from being quietly "fixed" away.

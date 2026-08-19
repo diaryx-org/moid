@@ -71,9 +71,20 @@ when the radix does not divide `delta × i`.
 
 With **29 prime** and `delta` necessarily smaller than it, that fails only when
 `29 | i` — so every single-character typo in an id shorter than 29 symbols is
-caught. Over a composite radix some are not: with `betanumeric` (28) a shift of
-7 at position 4 is invisible, and `crockford32` (32) has the same problem at
-position 2.
+caught.
+
+Over a composite radix some are not, and the blind spots start at position 2 —
+inside even the shortest id, not somewhere past the end of it:
+
+```ts
+const a = Alphabet.betanumeric();
+// `c` -> `v` at position 2: ordinals 1 and 15, so 2 × 14 = 28 ≡ 0 (mod 28).
+a.checkChar("bcdfgh") === a.checkChar("bvdfgh");   // true — undetectable
+```
+
+`c` and `v` are adjacent keys. Across positions 1–6 that is 140 invisible
+substitutions for `betanumeric` and 160 for `crockford32` (32, earliest also
+position 2, `delta` = 16, e.g. `B` → `V`). For `noidXdigit` it is zero.
 
 Dropping `y` is the other reason. It is the letter that lets an otherwise
 consonant-only string read as a word (`shy`, `dry`, `sky`), and it is the one
@@ -82,10 +93,12 @@ confusable pair (`v`/`y`) where betanumeric has *both* members in the alphabet.
 alphabet — so a misread lands outside the symbol set and fails as `BadChar`
 rather than passing silently.
 
-At the default 6-symbol length all three presets catch every realistic typo; the
-blind spots open up as ids get longer. Pass `alphabet` if you need a specific
-symbol set — `betanumeric` is what
-[diaryx](https://github.com/diaryx-org) and colophon mint from.
+Pass `alphabet` if you need a specific symbol set. `betanumeric` is mainly a
+compatibility set now — [diaryx](https://github.com/diaryx-org) and prov both
+minted from it before moving to the NOID vocabulary, so reach for it to validate
+ids from that era rather than to mint new ones. The blind spots above are a real
+but bounded cost for those: they need a substitution of one exact size at one of
+a few positions, so most corruptions are still caught.
 
 ## Entropy
 

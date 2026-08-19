@@ -77,9 +77,11 @@
 //! [`Alphabet::check_char`] catches it exactly when the radix does not divide
 //! `i·δ`. With 29 prime and `δ` necessarily smaller, that fails only when
 //! `29 | i` — every single-character typo in an id shorter than 29 symbols is
-//! caught. Over a composite radix some are not: [`Alphabet::betanumeric`] (28)
-//! misses a shift of 7 at position 4, and [`Alphabet::crockford32`] (32) misses
-//! one at position 2. See [`presets`] for the full comparison.
+//! caught. Over a composite radix some are not, starting at position 2 rather
+//! than somewhere safely past the end of a short id:
+//! [`Alphabet::betanumeric`] (28) misses a shift of 14 there (`c` -> `v`, two
+//! adjacent keys), and [`Alphabet::crockford32`] (32) misses a shift of 16.
+//! See [`presets`] for the full comparison.
 //!
 //! The check-character algorithm is NOID's; the *result* matches a standard
 //! NOID minter only when you mint over [`Alphabet::noid_xdigit`].

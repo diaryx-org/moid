@@ -240,7 +240,8 @@ mod tests {
 
     #[test]
     fn prefix_check_covers_the_prefix() {
-        // Rebuilds diaryx_ark's workspace blade: `dx` + 6 random + check(dx+body).
+        // Rebuilds diaryx_ark's pre-noid_xdigit workspace blade: `dx` + 6
+        // random + check(dx+body).
         let m = Minter::new(Alphabet::betanumeric(), 6)
             .with_prefix("dx")
             .unwrap();

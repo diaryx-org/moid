@@ -466,11 +466,14 @@ fn mints(specs: &[(&'static str, Vec<u8>)]) -> Vec<V> {
 
 // --------------------------------------------------------------- validation
 
-/// Every single-character corruption of `id`, plus the degenerate inputs.
+/// One corruption at every position of `id`, plus the degenerate inputs.
 ///
-/// Exhaustive over positions rather than sampled: the check character catches
-/// every single-symbol substitution, and the only way to show that is to try
-/// them all.
+/// Exhaustive over positions, but one replacement per position rather than
+/// every symbol in the alphabet — this file records outcomes for the port to
+/// match, so the value is in covering each position, not in enumerating the
+/// substitution space. Whether a given substitution is *caught* is a property of
+/// the radix (over a composite one some are invisible), and that law is asserted
+/// in `moid-ts/test/reference.test.ts`, not here.
 fn corruptions(alphabet: &Alphabet, id: &str) -> Vec<String> {
     let chars: Vec<char> = id.chars().collect();
     let mut out = vec![

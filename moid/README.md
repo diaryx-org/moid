@@ -50,13 +50,22 @@ The reason is the radix. A substitution at 1-based position `i` that shifts a
 symbol's ordinal by `δ` moves the weighted sum by `i·δ`, so the check character
 catches it exactly when the radix does not divide `i·δ`. With **29 prime** and
 `δ` necessarily smaller than it, that fails only when `29 | i` — so every
-single-character typo in an id shorter than 29 symbols is caught. Over a
-composite radix some are not: with `betanumeric` (28), a shift of 7 at position
-4 leaves the check character untouched, and `crockford32` (32) has the same
-problem at position 2.
+single-character typo in an id shorter than 29 symbols is caught.
 
-At the usual 6-symbol length all three are fine in practice; the blind spots
-open up as ids get longer.
+Over a composite radix some are not, and not only in long ids: for both other
+presets the blind spots start at position 2. With `betanumeric` (28), a shift
+of 14 there leaves the check character untouched —
+
+```rust
+let a = moid::Alphabet::betanumeric();
+// `c` -> `v`: ordinals 1 and 15, so 2·14 = 28 ≡ 0 (mod 28).
+assert_eq!(a.check_char("bcdfgh"), a.check_char("bvdfgh"));
+```
+
+— and `c`/`v` are adjacent keys. Across positions 1–6 that is 140 invisible
+substitutions for `betanumeric` and 160 for `crockford32` (32, earliest also
+position 2, `δ` = 16, e.g. `B` -> `V`). For `noid_xdigit` it is zero. That is
+the whole argument for the default.
 
 ## Entropy
 

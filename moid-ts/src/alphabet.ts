@@ -79,7 +79,9 @@ export class Alphabet {
 
   /**
    * The betanumeric preset (28 chars: no vowels, no `0`/`1`/`l`, includes
-   * `y`) — the alphabet colophon and diaryx share.
+   * `y`) — the alphabet prov and diaryx minted from before both moved to
+   * {@link Alphabet.noidXdigit}. Reach for it to read those ids, not to mint
+   * new ones.
    */
   static betanumeric(): Alphabet {
     return new Alphabet(BETANUMERIC);

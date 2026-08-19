@@ -42,7 +42,9 @@ impl Alphabet {
     }
 
     /// The betanumeric preset (28 chars: no vowels, no `0`/`1`/`l`, includes
-    /// `y`) — the alphabet colophon and diaryx share.
+    /// `y`) — the alphabet prov and diaryx minted from before both moved to
+    /// [`Alphabet::noid_xdigit`]. Reach for it to read those ids, not to mint
+    /// new ones.
     pub fn betanumeric() -> Self {
         Self::new(presets::BETANUMERIC).expect("BETANUMERIC preset is valid")
     }
@@ -148,12 +150,14 @@ mod tests {
     }
 
     #[test]
-    fn betanumeric_check_char_matches_ark_and_colophon_vectors() {
+    fn betanumeric_check_char_matches_ark_and_prov_vectors() {
+        // Vectors from the betanumeric era, kept so ids minted then still read
+        // back identically now that prov and diaryx mint over noid_xdigit.
         let a = Alphabet::betanumeric();
         // diaryx_ark::tests::check_char_known_vectors
         assert_eq!(a.check_char("bcdfg"), 'r');
         assert_eq!(a.check_char("dxbcdfgh"), '6');
-        // colophon::identity::tests::check_char_matches_the_ark_lineage
+        // prov (then colophon): identity::tests::check_char_matches_the_ark_lineage
         assert_eq!(a.check_char("bcdfgh"), 't');
     }
 
