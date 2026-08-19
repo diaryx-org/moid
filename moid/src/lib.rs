@@ -66,6 +66,47 @@
 //! - [`Minter::mint_os`] — ambient OS/browser entropy via `getrandom`, behind
 //!   the `os` (native/WASI) and `js` (browser wasm) features.
 //!
+//! ## Content-addressed ids
+//!
+//! [`Minter::mint`] takes any `FnMut() -> u8`, so pointing it at a hash rather
+//! than a PRNG turns it into a deterministic, content-derived id over the
+//! configured alphabet — check character and all. No feature or extra API is
+//! involved; it is the same mint with a different byte source:
+//!
+//! ```ignore
+//! let minter = Minter::new(Alphabet::noid_xdigit(), 16);
+//!
+//! // Any extendable-output function will do; BLAKE3 in XOF mode here.
+//! let mut xof = blake3::Hasher::new().update(content).finalize_xof();
+//! let mut buf = [0u8; 1];
+//! let id = minter.mint(&mut || {
+//!     xof.fill(&mut buf);
+//!     buf[0]
+//! });
+//! ```
+//!
+//! Three things to keep straight when doing this:
+//!
+//! - **Feed it an XOF, not a fixed-width digest.** Minting rejection-samples to
+//!   avoid modulo bias, so it consumes an unbounded number of bytes — over
+//!   [`Alphabet::noid_xdigit`] a byte is accepted with probability 232/256.
+//!   Draining a 32-byte digest for 16 symbols runs off the end about once in
+//!   2·10⁹: rare enough never to surface in testing, common enough to be a real
+//!   bug. With only a fixed digest to hand, expand it in counter mode —
+//!   `H(content ‖ 0)`, `H(content ‖ 1)`, … — and read from that stream.
+//! - **The entropy is the id's, not the digest's.** `n` symbols carry
+//!   `n·log₂(radix)` bits however wide the hash behind them was, so collisions
+//!   arrive at the birthday bound: 16 noid symbols is 77.7 bits (collisions
+//!   around 2³⁹ ids), 26 symbols is 126.3 bits (around 2⁶³). Rendering SHA-256
+//!   into 10 symbols leaves 48.6 bits, not 256.
+//! - **[`Minter::mint_unique`] does not apply.** Retrying until a candidate is
+//!   untaken is right for a random draw and wrong for a content hash: the same
+//!   input has to keep yielding the same id, and a clash between two *different*
+//!   inputs is a real collision rather than something to mint past.
+//!
+//! The check character is a deterministic function of the body, so it adds a
+//! symbol of length and no bits of entropy — leave it out of the budget above.
+//!
 //! ## Choosing an alphabet
 //!
 //! There is no default here — [`Minter::new`] takes one — but `moid-cli` and

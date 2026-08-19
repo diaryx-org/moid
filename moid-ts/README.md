@@ -124,6 +124,57 @@ const taken = new Set<string>();
 const id = minter.mintUnique((candidate) => taken.has(candidate));
 ```
 
+## Content-addressed ids
+
+`mint` takes any `ByteSource`, so pointing it at a hash rather than a PRNG turns
+it into a deterministic, content-derived id over the configured alphabet — check
+character and all. WebCrypto has no extendable-output function, so expand
+SHA-256 in counter mode and read bytes off the result:
+
+```ts
+import { Minter } from "moid";
+
+/** SHA-256 in counter mode, as a synchronous `ByteSource` over `content`. */
+async function digestBytes(content: Uint8Array, count: number) {
+  const out = new Uint8Array(Math.ceil(count / 32) * 32);
+  for (let block = 0; block * 32 < out.length; block++) {
+    const input = new Uint8Array(content.length + 4);
+    input.set(content);
+    new DataView(input.buffer).setUint32(content.length, block);
+    out.set(new Uint8Array(await crypto.subtle.digest("SHA-256", input)), block * 32);
+  }
+  let i = 0;
+  return () => {
+    if (i >= out.length) throw new RangeError("digest bytes exhausted");
+    return out[i++];
+  };
+}
+
+const minter = new Minter({ randomLength: 16 });
+const id = minter.mint(await digestBytes(content, 16 * 3));
+```
+
+Three things to keep straight when doing this:
+
+- **Derive more bytes than symbols.** Minting rejection-samples to avoid modulo
+  bias, so it consumes an unbounded number of bytes — over `noidXdigit` a byte
+  is accepted with probability 232/256. A bare 32-byte digest runs dry on 16
+  symbols about once in 2·10⁹, which is rare enough never to surface in testing
+  and common enough to be a real bug; at the three-bytes-per-symbol above it is
+  once in 3·10²². The source throws rather than silently reusing bytes.
+- **The entropy is the id's, not the digest's.** `n` symbols carry
+  `n·log₂(radix)` bits however wide the hash behind them was, so collisions
+  arrive at the birthday bound: 16 noid symbols is 77.7 bits (collisions around
+  2³⁹ ids), 26 symbols is 126.3 bits (around 2⁶³). Rendering SHA-256 into 10
+  symbols leaves 48.6 bits, not 256.
+- **`mintUnique` does not apply.** Retrying until a candidate is untaken is
+  right for a random draw and wrong for a content hash: the same input has to
+  keep yielding the same id, and a clash between two *different* inputs is a
+  real collision rather than something to mint past.
+
+The check character is a deterministic function of the body, so it adds a symbol
+of length and no bits of entropy — leave it out of the budget above.
+
 ## Errors
 
 Rust's `Result` becomes a thrown `MoidError` carrying a stable `code`, with
