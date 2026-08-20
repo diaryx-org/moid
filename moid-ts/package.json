@@ -1,5 +1,5 @@
 {
-  "name": "moid",
+  "name": "@diaryx/moid",
   "version": "1.0.0",
   "description": "Minimal opaque ID minter: random, optionally check-digited identifiers over a configurable alphabet, with a NOID-style check character. Mint-only — binding and resolution are deliberately out of scope.",
   "keywords": [
