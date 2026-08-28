@@ -4,9 +4,13 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    # The org's Rust toolchain and the shell that carries it. moid needs nothing
+    # of its own, so this is the whole of what it takes.
+    diaryx-nix.url = "github:diaryx-org/nix";
+    diaryx-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, diaryx-nix }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
@@ -50,8 +54,8 @@
           program = "${self.packages.${system}.moid}/bin/moid";
         };
 
-        devShells.default = pkgs.mkShell {
-          nativeBuildInputs = [ pkgs.cargo pkgs.rustc ];
-        };
+        # The pinned toolchain rather than nixpkgs' `cargo`/`rustc`, and git-cliff
+        # for `dx changelog`.
+        devShells.default = diaryx-nix.devShells.${system}.rust;
       });
 }
