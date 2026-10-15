@@ -55,7 +55,7 @@
         };
 
         # The pinned toolchain rather than nixpkgs' `cargo`/`rustc`, and git-cliff
-        # for `release changelog`.
+        # for `ship changelog`.
         devShells.default = diaryx-nix.devShells.${system}.rust;
       });
 }
