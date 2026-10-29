@@ -118,11 +118,16 @@ impl Alphabet {
     /// the NOID minter uses; the *result* differs from NOID only when the
     /// alphabet differs (a different radix or ordering).
     pub fn check_char(&self, body: &str) -> char {
+        let radix = self.radix();
         let mut sum: usize = 0;
         for (i, c) in body.chars().enumerate() {
-            sum += self.ordinal(c).unwrap_or(0) * (i + 1);
+            // Reduced every step, as moid-ts does: identical result, but every
+            // term stays under radix², so a long body cannot overflow a
+            // 32-bit `usize`.
+            let position = (i + 1) % radix;
+            sum = (sum + self.ordinal(c).unwrap_or(0) * position) % radix;
         }
-        self.symbol(sum % self.radix())
+        self.symbol(sum)
     }
 
     /// Whether `blade_with_check`'s trailing character is the correct check
@@ -138,6 +143,7 @@ impl Alphabet {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::string::String;
 
     #[test]
     fn rejects_bad_alphabets() {
@@ -165,6 +171,18 @@ mod tests {
     fn check_char_treats_unknown_as_zero_but_advances_position() {
         // diaryx_ark parity: "b-d" -> b(0)*1 + '-'(0)*2 + d(2)*3 = 6 -> 'j'
         assert_eq!(Alphabet::betanumeric().check_char("b-d"), 'j');
+    }
+
+    #[test]
+    fn check_char_of_a_body_past_a_32_bit_sum() {
+        // 20,000 of noid_xdigit's last symbol sums to about 5.6e9, past
+        // u32::MAX, which overflowed on wasm32. 'f' is what moid-ts gives.
+        let a = Alphabet::noid_xdigit();
+        let last = a.symbol(a.radix() - 1);
+        let body: String = core::iter::repeat(last).take(20_000).collect();
+        assert_eq!(a.check_char(&body), 'f');
+        let body: String = core::iter::repeat(last).take(17_000).collect();
+        assert_eq!(a.check_char(&body), '8');
     }
 
     #[test]
