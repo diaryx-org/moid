@@ -1,7 +1,7 @@
 ---
 title: The check character overflows a 32-bit sum
 description: "`Alphabet::check_char` sums `ordinal × position` in a `usize` and reduces once at the end, so on wasm32 a body of about 17,500 symbols panics in a debug build and gets a check character the TypeScript port and a 64-bit build disagree with in a release build"
-status: open
+status: done
 created: 2026-10-29
 updated: 2026-10-29
 part_of: "[Tasks](tasks.md)"
@@ -54,3 +54,12 @@ body that does not overflow. A test pins the 20,000-symbol body above to
 `'f'`. That test passes on x86_64 either way, so it has also been seen to
 pass on a 32-bit target: wasm32-wasip1 under a WASI runtime, or
 `i686-unknown-linux-gnu`.
+
+## Done
+
+`fix(moid): reduce the check character's sum as it goes` takes the
+remainder at every step, of the position as well as of the sum, so no term
+passes radix². `check_char_of_a_body_past_a_32_bit_sum` in
+`moid/src/alphabet.rs` pins the 20,000-symbol body to `'f'` and the
+17,000-symbol one to `'8'`, and passes on wasm32-wasip1 under Node's
+`node:wasi`, in a debug build and a release one.
